@@ -47,7 +47,7 @@ public:
 	L3G4200D();
 	void init(I2C *i2c);
 	void calibrate();
-	void read(vector out);
+	void read(vector &out);
 
 private:
 	I2C *I2Cx;

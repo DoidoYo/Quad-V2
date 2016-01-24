@@ -9,8 +9,14 @@
 #define QUAD_H_
 
 #include "stm32f10x.h"
+
+#include "libs/USART1.h"
+#include "libs/Timer.h"
+
 #include "quadcopter/Input.h"
 #include "quadcopter/PID.h"
+#include "quadcopter/Motors.h"
+#include "quadcopter/TaskManager.h"
 
 #include "libs/I2C.h"
 #include "libs/GPIO.h"
@@ -58,6 +64,7 @@
 #define UNARMED 0
 
 #define ARMED_TIMEOUT 5000
+#define STICK_TIMEOUT 1500
 
 #define STICK_DEAD 50
 #define STICK_HIGH 1800
@@ -100,12 +107,12 @@ extern I2C i2c;
 extern BMP180 baro;
 extern L3G4200D gyro;
 
-extern int Armed, Mode;
+extern int _armed, Mode;
 
 extern int scaledInput[6];
-extern vector angle;
+extern vector angleRate;
 
-extern float outPid[3];
+extern float pidOut[3];
 extern PID pid[3];
 
 void computeFlight(int throttle, int roll, int pitch, int yaw, int mode);
@@ -115,6 +122,10 @@ void TASK_checkReceiver();
 void TASK_stickReader();
 void TASK_controller();
 
+
+void Arm();
+void Disarm();
+int Armed();
 
 ///////////////////////////
 

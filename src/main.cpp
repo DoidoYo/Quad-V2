@@ -1,12 +1,10 @@
 
-#include "main.h"
 
 #include "stm32f10x.h"
 
 #include "libs/Timer.h"
 #include "libs/USART1.h"
 
-#include "quadcopter/TaskManager.h"
 #include "quadcopter/quad.h"
 
 int main(void) {
@@ -14,7 +12,8 @@ int main(void) {
 	initTimer();
 	initUSART1(115200);
 
-	initReceiver();
+	inputInit();
+	motorsInit();
 
 	LED_G.init(LEDG_PORT, LEDG_PIN, GPIO_Mode_Out_PP);
 	LED_R.init(LEDR_PORT, LEDR_PIN, GPIO_Mode_Out_PP);
@@ -22,9 +21,25 @@ int main(void) {
 	BUZZER.init(BUZZER_PORT, BUZZER_PIN, GPIO_Mode_Out_PP);
 	BUTTON.init(BUTTON_PORT, BUTTON_PIN, GPIO_Mode_IPU);
 
+	LED_SYS.high();
+
+	if(BUTTON.read() == 0) {
+		LED_G.high();
+		LED_R.high();
+		motorsSetAll(MOTOR_MAX);
+		delayMillis(4000);
+		motorsSetAll(MOTOR_MIN);
+		LED_G.low();
+		LED_R.low();
+	}
+
 	i2c.init(I2C1, 100000);
 
 	gyro.init(&i2c);
+
+	LED_R.high();
+	gyro.calibrate();
+	LED_R.low();
 
 	pid[ROLL].init(ROLL_KP, ROLL_KI, ROLL_KD, ROLL_MAX);
 	pid[PITCH].init(PITCH_KP, PITCH_KI, PITCH_KD, PITCH_MAX);

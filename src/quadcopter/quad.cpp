@@ -20,13 +20,28 @@ I2C i2c;
 BMP180 baro;
 L3G4200D gyro;
 
-int Armed = UNARMED, Mode = MODE_GYRO;
+int _armed = UNARMED, Mode = MODE_GYRO;
 
 int scaledInput[6];
-vector angle;
+vector angleRate;
 
-float outPid[3];
+float pidOut[3];
 PID pid[3];
+
+void Arm() {
+	LED_G.high();
+	_armed = ARMED;
+}
+
+void Disarm() {
+	LED_G.low();
+	motorsSetAll(1000);
+	_armed = UNARMED;
+}
+
+int Armed() {
+	return _armed;
+}
 
 int map(int x, int min, int max, int nmin, int nmax, int deadmin, int deadmax) {
 

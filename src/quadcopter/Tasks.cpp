@@ -11,19 +11,19 @@ uint64_t armedTimer;
 void TASK_controller() {
 	if (inputConnected) {
 		//flight loop
-		if (Armed == ARMED && scaledInput[RC_THROTTLE] > 1050) {
+		if (Armed() && input[RC_THROTTLE] > 1050) {
 			armedTimer = millis();
 
 			int roll_scale, pitch_scale;
-			float roll_set, pitch_set;
+			float pid_roll_set, pid_pitch_set;
 
 			if (Mode == MODE_GYRO) {
 
 				roll_scale = RATE_ROLL_SCALE;
 				pitch_scale = RATE_PITCH_SCALE;
 
-				roll_set = angle.x;
-				pitch_set = angle.y;
+				pid_roll_set = angleRate.x;
+				pid_pitch_set = angleRate.y;
 
 			} else if (Mode == MODE_STAB || Mode == MODE_BARO) {
 
@@ -49,20 +49,34 @@ void TASK_controller() {
 			STICK_DEAD_MAX);
 
 			//if flying
+			pidOut[ROLL] = pid[ROLL].compute(pid_roll_set,
+					-scaledInput[RC_ROLL]);
+			pidOut[PITCH] = pid[PITCH].compute(pid_pitch_set,
+					-scaledInput[RC_PITCH]);
+			pidOut[YAW] = pid[YAW].compute(angleRate.z, -scaledInput[RC_YAW]);
 
-		} else if (Armed == ARMED) {
+
+			motors[M_FR] = scaledInput[RC_THROTTLE] + pidOut[ROLL] + pidOut[PITCH] - pidOut[YAW];
+			motors[M_FL] = scaledInput[RC_THROTTLE] - pidOut[ROLL] + pidOut[PITCH] + pidOut[YAW];
+			motors[M_BL] = scaledInput[RC_THROTTLE] - pidOut[ROLL] - pidOut[PITCH] - pidOut[YAW];
+			motors[M_BR] = scaledInput[RC_THROTTLE] + pidOut[ROLL] - pidOut[PITCH] + pidOut[YAW];
+
+			motorsUpdate();
+
+		} else if (Armed()) {
 			if ((millis() - armedTimer) > ARMED_TIMEOUT) {
-				Armed = UNARMED;
-			}
+				Disarm();
+			} else {
+				//idle state?
+				motorsSetAll(1100);
 
-			//idle state?
-			//make motors = 1100
-		} else {
-			//UNARMED
-			//make motors = 1000
+				pid[ROLL].reset();
+				pid[PITCH].reset();
+				pid[YAW].reset();
+			}
 		}
 	} else {
-		Armed = UNARMED;
+		Disarm();
 		//descend or something
 	}
 }
@@ -70,33 +84,39 @@ void TASK_controller() {
 void TASK_gyro() {
 	vector v;
 	gyro.read(v);
+	v.z *= -1;
 
-	angle.x = (angle.x * .8) + (v.x * .2);
-	angle.x = (angle.y * .8) + (v.y * .2);
-	angle.x = (angle.z * .8) + (v.z * .2);
+	angleRate.x = (angleRate.x * .8) + (v.x * .2);
+	angleRate.y = (angleRate.y * .8) + (v.y * .2);
+	angleRate.z = (angleRate.z * .8) + (v.z * .2);
+
+	//printf2("rate: %i \t %i \t %i \n", (int)angleRate.x,(int)angleRate.y,(int)angleRate.z);
+
 }
 
 void TASK_checkReceiver() {
-	checkReceiverConnection();
+	inputCheck();
 }
 
 uint64_t stickTimer;
 void TASK_stickReader() {
-	int delayOver = ((millis() - stickTimer) > 1500) ? 1 : 0;
+	int delayOver = ((millis() - stickTimer) > STICK_TIMEOUT) ? 1 : 0;
 
 	//arm
 	if (STICKRIGHT(input[RC_YAW]) && STICKDOWN(input[RC_THROTTLE])) {
 		if (delayOver) {
-			Armed = ARMED;
+			Arm();
 			armedTimer = millis();
 		}
 	} else if (STICKLEFT(input[RC_YAW]) && STICKDOWN(input[RC_THROTTLE])) {
 		if (delayOver) {
-			Armed = UNARMED;
+			Disarm();
 		}
-	} else if(STICKDOWN(input[RC_PITCH]) && STICKRIGHT(input[RC_ROLL])) {
+	} else if (STICKDOWN(input[RC_PITCH]) && STICKRIGHT(input[RC_ROLL])) {
 		if (delayOver) {
+			LED_R.high();
 			gyro.calibrate();
+			LED_R.low();
 		}
 	} else {
 		stickTimer = millis();

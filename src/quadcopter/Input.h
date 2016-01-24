@@ -21,8 +21,8 @@
 #define DISCONNECTED 0
 #define CONNECTED 1
 
-void initReceiver();
-void checkReceiverConnection();
+void inputInit();
+void inputCheck();
 
 extern uint64_t input[6];
 extern int inputConnected;

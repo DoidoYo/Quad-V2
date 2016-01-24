@@ -18,16 +18,16 @@ void L3G4200D::init(I2C *i2c) {
 
 	calibrated = 0;
 
-	zeroX = 0;
-	zeroY = 0;
-	zeroZ = 0;
-
 	delayMillis(250);
 }
 
 void L3G4200D::calibrate() {
 
 	vector v;
+
+	zeroX = 0;
+	zeroY = 0;
+	zeroZ = 0;
 
 	for (int i = 0; i < 1000; i++) {
 		read(v);
@@ -42,20 +42,29 @@ void L3G4200D::calibrate() {
 	zeroY /= 1000;
 	zeroZ /= 1000;
 
+	calibrated = 1;
+
 	//printf2("Zeroes: %i \t %i \t %i \n", (int)zeroX,(int)zeroY,(int)zeroZ);
 
 }
 
-void L3G4200D::read(vector out) {
+void L3G4200D::read(vector &out) {
 	uint8_t data[6];
 
 	I2Cx->readBytes(105, 168, 6, data);
 
-	out.x = (float)(((int16_t)((data[1] << 8) | data[0])) / 57.14286);
-	out.y = (float)(((int16_t)((data[3] << 8) | data[2])) / 57.14286);
-	out.z = (float)(((int16_t)((data[5] << 8) | data[4])) / 57.14286);
+	out.x = (float) (((int16_t) ((data[1] << 8) | data[0])));
+	out.y = (float) (((int16_t) ((data[3] << 8) | data[2])));
+	out.z = (float) (((int16_t) ((data[5] << 8) | data[4])));
+
+	out.x /= 57.14286;
+	out.y /= 57.14286;
+	out.z /= 57.14286;
+
+	if (calibrated) {
+		out.x -= zeroX;;
+		out.y -= zeroY;
+		out.z -= zeroZ;
+	}
 }
-
-
-
 

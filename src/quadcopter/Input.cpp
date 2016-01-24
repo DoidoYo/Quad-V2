@@ -12,7 +12,7 @@ uint64_t pulseStart[6];
 
 int inputConnected = DISCONNECTED;
 
-void initReceiver() {
+void inputInit() {
 
 	RCC_APB2PeriphClockCmd(
 	RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB | RCC_APB2Periph_AFIO, ENABLE);
@@ -137,7 +137,7 @@ void initReceiver() {
 
 }
 
-void checkReceiverConnection() {
+void inputCheck() {
 	inputConnected = CONNECTED;
 	for (int i = 0; i < 6; i++) {
 		if ((micros() - pulseStart[i]) > 21000) {
