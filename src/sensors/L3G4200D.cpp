@@ -7,10 +7,12 @@
 
 #include "L3G4200D.h"
 
-L3G4200D::L3G4200D() {
+L3G4200D::L3G4200D()
+{
 }
 
-void L3G4200D::init(I2C *i2c) {
+void L3G4200D::init(I2C *i2c)
+{
 	I2Cx = i2c;
 
 	I2Cx->sendByte(105, 0x20, 0x0F);
@@ -21,7 +23,8 @@ void L3G4200D::init(I2C *i2c) {
 	delayMillis(250);
 }
 
-void L3G4200D::calibrate() {
+void L3G4200D::calibrate(GPIO light)
+{
 
 	vector v;
 
@@ -29,7 +32,11 @@ void L3G4200D::calibrate() {
 	zeroY = 0;
 	zeroZ = 0;
 
-	for (int i = 0; i < 1000; i++) {
+	for (int i = 0; i < 1000; i++)
+	{
+		if (i % 15 == 0)
+			light.toggle();
+
 		read(v);
 		zeroX += (float) v.x;
 		zeroY += (float) v.y;
@@ -37,6 +44,8 @@ void L3G4200D::calibrate() {
 
 		delayMillis(5);
 	}
+
+	light.low();
 
 	zeroX /= 1000;
 	zeroY /= 1000;
@@ -48,7 +57,8 @@ void L3G4200D::calibrate() {
 
 }
 
-void L3G4200D::read(vector &out) {
+void L3G4200D::read(vector &out)
+{
 	uint8_t data[6];
 
 	I2Cx->readBytes(105, 168, 6, data);
@@ -61,8 +71,10 @@ void L3G4200D::read(vector &out) {
 	out.y /= 57.14286;
 	out.z /= 57.14286;
 
-	if (calibrated) {
-		out.x -= zeroX;;
+	if (calibrated)
+	{
+		out.x -= zeroX;
+		;
 		out.y -= zeroY;
 		out.z -= zeroZ;
 	}

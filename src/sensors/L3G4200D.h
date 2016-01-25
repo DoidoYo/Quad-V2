@@ -11,6 +11,8 @@
 #include "stm32f10x.h"
 #include "libs/I2C.h"
 #include "libs/Timer.h"
+#include "libs/Util.h"
+#include "libs/GPIO.h"
 
 #define L3G4200D_WHO_AM_I      0x0F
 
@@ -36,17 +38,12 @@
 #define L3G4200D_OUT_Z_L       0x2C
 #define L3G4200D_OUT_Z_H       0x2D
 
-
-struct vector {
-	float x, y, z;
-};
-
 class L3G4200D {
 
 public:
 	L3G4200D();
 	void init(I2C *i2c);
-	void calibrate();
+	void calibrate(GPIO light);
 	void read(vector &out);
 
 private:

@@ -17,6 +17,7 @@ public:
 	void init(GPIO_TypeDef* gpio, uint16_t pin, GPIOMode_TypeDef mode);
 	void high();
 	void low();
+	void toggle();
 	int read();
 
 private:

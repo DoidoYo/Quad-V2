@@ -7,10 +7,12 @@
 
 #include "quadcopter/quad.h"
 
+uint64_t loop_timer;
+
 int main(void) {
 
 	initTimer();
-	initUSART1(115200);
+	initUSART1(19200);
 
 	inputInit();
 	motorsInit();
@@ -36,16 +38,22 @@ int main(void) {
 	i2c.init(I2C1, 100000);
 
 	gyro.init(&i2c);
+	accel.init(&i2c);
 
 	LED_R.high();
-	gyro.calibrate();
+	gyro.calibrate(LED_G);
 	LED_R.low();
+
+	LED_G.high();
+	accel.calibrate(LED_R);
+	LED_G.low();
 
 	pid[ROLL].init(ROLL_KP, ROLL_KI, ROLL_KD, ROLL_MAX);
 	pid[PITCH].init(PITCH_KP, PITCH_KI, PITCH_KD, PITCH_MAX);
 	pid[YAW].init(YAW_KP, YAW_KI, YAW_KD, YAW_MAX);
 
 	TaskManager::addTask(TASK_gyro, 250);
+	TaskManager::addTask(TASK_accel, 250);
 	TaskManager::addTask(TASK_controller, 250);
 	TaskManager::addTask(TASK_checkReceiver, 55);
 	TaskManager::addTask(TASK_stickReader, 20);

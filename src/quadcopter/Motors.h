@@ -15,7 +15,7 @@
 #define M_BL 2
 #define M_BR 3
 
-extern uint16_t motors[4];
+extern int motors[4];
 
 void motorsInit();
 void motorsSetAll(int i);

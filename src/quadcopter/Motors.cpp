@@ -14,7 +14,7 @@
  * motor 4 BR = 10 - (PA1) TIME2_CH2
  */
 
-uint16_t motors[4];
+int motors[4];
 
 void motorsInit() {
 

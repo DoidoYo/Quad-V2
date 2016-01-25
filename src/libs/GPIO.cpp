@@ -44,6 +44,14 @@ void GPIO::low() {
 	GPIO_ResetBits(_gpio, _pin);
 }
 
+void GPIO::toggle() {
+	if(read() == 1) {
+		low();
+	} else {
+		high();
+	}
+}
+
 int GPIO::read() {
 	return GPIO_ReadInputDataBit(_gpio, _pin);
 }

@@ -10,8 +10,11 @@
 
 #include "stm32f10x.h"
 
+#include "math.h"
+
 #include "libs/USART1.h"
 #include "libs/Timer.h"
+#include "libs/Util.h"
 
 #include "quadcopter/Input.h"
 #include "quadcopter/PID.h"
@@ -23,6 +26,7 @@
 
 #include "sensors/BMP180.h"
 #include "sensors/L3G4200D.h"
+#include "sensors/ADXL345.h"
 
 ///////////////////////////////////////
 /////      STICK SCALING     //////////
@@ -106,11 +110,15 @@ extern I2C i2c;
 
 extern BMP180 baro;
 extern L3G4200D gyro;
+extern ADXL345 accel;
 
 extern int _armed, Mode;
 
 extern int scaledInput[6];
-extern vector angleRate;
+
+extern vector gyroRate, gyroRateSmooth, gyroAngle;
+extern vector accelAccel,accelSmooth, accelAngle;
+extern vector angle;
 
 extern float pidOut[3];
 extern PID pid[3];
@@ -118,17 +126,20 @@ extern PID pid[3];
 void computeFlight(int throttle, int roll, int pitch, int yaw, int mode);
 
 void TASK_gyro();
+void TASK_accel();
 void TASK_checkReceiver();
 void TASK_stickReader();
 void TASK_controller();
-
 
 void Arm();
 void Disarm();
 int Armed();
 
+void processQuad(int throttle, pos3D desired, vector current);
+
 ///////////////////////////
 
+void constrain(int &i, int min, int max);
 int map(int x, int min, int max, int nmin, int nmax, int deadmin,
 		int deadmax);
 int STICKRIGHT(int s);
