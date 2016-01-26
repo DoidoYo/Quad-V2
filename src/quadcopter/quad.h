@@ -120,10 +120,10 @@ extern vector gyroRate, gyroRateSmooth, gyroAngle;
 extern vector accelAccel,accelSmooth, accelAngle;
 extern vector angle;
 
-extern float pidOut[3];
+extern double pidOut[3];
 extern PID pid[3];
 
-void computeFlight(int throttle, int roll, int pitch, int yaw, int mode);
+void processQuad(int throttle, vector current, pos3D desired);
 
 void TASK_gyro();
 void TASK_accel();

@@ -103,7 +103,7 @@ private:
 	I2C *i2c;
 
 	int calibrated;
-	float zeroX,zeroY,zeroZ;
+	double zeroX,zeroY,zeroZ;
 
 };
 

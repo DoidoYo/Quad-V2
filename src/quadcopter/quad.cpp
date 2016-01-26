@@ -27,25 +27,25 @@ vector gyroRate, gyroRateSmooth, gyroAngle;
 vector accelAccel, accelSmooth, accelAngle;
 vector angle;
 
-float pidOut[3];
+double pidOut[3];
 PID pid[3];
 
-void processQuad(int throttle, pos3D desired, vector current)
+void processQuad(int throttle, vector current, pos3D desired)
 {
 	//if flying
-	pidOut[ROLL] = pid[ROLL].compute(current.x, desired.x);
-	pidOut[PITCH] = pid[PITCH].compute(current.y, desired.y);
-	pidOut[YAW] = pid[YAW].compute(current.z, desired.z);
+	pidOut[ROLL] = pid[ROLL].compute(current.x, -desired.x);
+	pidOut[PITCH] = pid[PITCH].compute(current.y, -desired.y);
+	pidOut[YAW] = pid[YAW].compute(current.z, -desired.z);
 
 	motors[M_FR] = throttle + pidOut[ROLL] + pidOut[PITCH] - pidOut[YAW];
 	motors[M_FL] = throttle - pidOut[ROLL] + pidOut[PITCH] + pidOut[YAW];
 	motors[M_BL] = throttle - pidOut[ROLL] - pidOut[PITCH] - pidOut[YAW];
 	motors[M_BR] = throttle + pidOut[ROLL] - pidOut[PITCH] + pidOut[YAW];
 
-	constrain(motors[M_FR], 1100, MOTOR_MAX);
-	constrain(motors[M_FL], 1100, MOTOR_MAX);
-	constrain(motors[M_BL], 1100, MOTOR_MAX);
-	constrain(motors[M_BR], 1100, MOTOR_MAX);
+	constrain(motors[M_FR], 1200, MOTOR_MAX);
+	constrain(motors[M_FL], 1200, MOTOR_MAX);
+	constrain(motors[M_BL], 1200, MOTOR_MAX);
+	constrain(motors[M_BR], 1200, MOTOR_MAX);
 
 	motorsUpdate();
 

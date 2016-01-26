@@ -38,9 +38,9 @@ void ADXL345::read(vector &v)
 	uint8_t data[6];
 	i2c->readBytes(ADXL345_ADDRESS, ADXL345_REG_DATAX0, 6, data);
 
-	v.x = (float) ((int16_t) (data[0] | (data[1] << 8)));
-	v.y = (float) ((int16_t) (data[2] | (data[3] << 8)));
-	v.z = (float) ((int16_t) (data[4] | (data[5] << 8)));
+	v.x = (double) ((int16_t) (data[0] | (data[1] << 8)));
+	v.y = (double) ((int16_t) (data[2] | (data[3] << 8)));
+	v.z = (double) ((int16_t) (data[4] | (data[5] << 8)));
 
 	v.x /= 256;
 	v.y /= 256;

@@ -14,7 +14,11 @@ struct pos3D {
 };
 
 struct vector {
-	float x, y, z;
+	double x, y, z;
+};
+
+struct vectorl {
+	long double x, y, z;
 };
 
 

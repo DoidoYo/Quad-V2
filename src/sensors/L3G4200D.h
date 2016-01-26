@@ -50,7 +50,7 @@ private:
 	I2C *I2Cx;
 
 	int calibrated;
-	float zeroX, zeroY, zeroZ;
+	double zeroX, zeroY, zeroZ;
 
 };
 

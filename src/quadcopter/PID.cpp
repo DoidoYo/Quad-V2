@@ -4,7 +4,7 @@
 
 #include "PID.h"
 
-void PID::init(float kp, float ki, float kd, float max)
+void PID::init(double kp, double ki, double kd, double max)
 {
 	_kp = kp;
 	_ki = ki;
@@ -15,7 +15,7 @@ void PID::init(float kp, float ki, float kd, float max)
 	_last_error = 0;
 }
 
-float PID::compute(float input, float set) {
+double PID::compute(double input, double set) {
 	_error = input - set;
 
 	_error_sum += _ki * _error; //compute integral error
@@ -39,7 +39,7 @@ void PID::reset() {
 	_last_error = 0;
 }
 
-void PID::setTuning(float kp, float ki, float kd, float max) {
+void PID::setTuning(double kp, double ki, double kd, double max) {
 	_kp = kp;
 	_ki = ki;
 	_kd = kd;

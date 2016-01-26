@@ -38,9 +38,9 @@ void L3G4200D::calibrate(GPIO light)
 			light.toggle();
 
 		read(v);
-		zeroX += (float) v.x;
-		zeroY += (float) v.y;
-		zeroZ += (float) v.z;
+		zeroX += (double) v.x;
+		zeroY += (double) v.y;
+		zeroZ += (double) v.z;
 
 		delayMillis(5);
 	}
@@ -63,9 +63,9 @@ void L3G4200D::read(vector &out)
 
 	I2Cx->readBytes(105, 168, 6, data);
 
-	out.x = (float) (((int16_t) ((data[1] << 8) | data[0])));
-	out.y = (float) (((int16_t) ((data[3] << 8) | data[2])));
-	out.z = (float) (((int16_t) ((data[5] << 8) | data[4])));
+	out.x = (double) (((int16_t) ((data[1] << 8) | data[0])));
+	out.y = (double) (((int16_t) ((data[3] << 8) | data[2])));
+	out.z = (double) (((int16_t) ((data[5] << 8) | data[4])));
 
 	out.x /= 57.14286;
 	out.y /= 57.14286;
