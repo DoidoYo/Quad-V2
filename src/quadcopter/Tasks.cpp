@@ -7,38 +7,35 @@
 
 #include "quad.h"
 
-uint16_t timeLast;
-
 uint64_t armedTimer;
 void TASK_controller()
 {
-	uint64_t timeNow = millis();
-	uint64_t dt = timeNow - timeLast;
-	timeLast = timeNow;
 
 	//smoothing gyro rate for rate mode
 	gyroRateSmooth.x = (gyroRateSmooth.x * .8) + (gyroRate.x * .2);
 	gyroRateSmooth.y = (gyroRateSmooth.y * .8) + (gyroRate.y * .2);
 	gyroRateSmooth.z = (gyroRateSmooth.z * .8) + (gyroRate.z * .2);
 
-	accelSmooth.x = (accelSmooth.x * .8) + (accelAccel.x * .2);
+	/*accelSmooth.x = (accelSmooth.x * .8) + (accelAccel.x * .2);
 	accelSmooth.y = (accelSmooth.y * .8) + (accelAccel.y * .2);
-	accelSmooth.z = (accelSmooth.z * .8) + (accelAccel.z * .2);
+	accelSmooth.z = (accelSmooth.z * .8) + (accelAccel.z * .2);*/
 
 	//getting angle from gyro rate
-	gyroAngle.x += gyroRateSmooth.x * dt / 1000;
-	gyroAngle.y += gyroRateSmooth.y * dt / 1000;
-	gyroAngle.z += gyroRateSmooth.z * dt / 1000;
+	/*gyroAngle.x += gyroRateSmooth.x * .004;
+	gyroAngle.y += gyroRateSmooth.y * .004;
+	gyroAngle.z += gyroRateSmooth.z * .004;*/
 
 
 	//angle from accelerometer
-	accelAngle.x =  atan2(accelSmooth.y, sqrt(pow(accelSmooth.x,2) + pow(accelSmooth.z,2))) * (180/M_PI);
-	accelAngle.y = -atan2(accelSmooth.x, sqrt(pow(accelSmooth.y,2) + pow(accelSmooth.z,2))) * (180/M_PI);
+	accelAngle.x =  atan2(accelAccel.y, sqrt(pow(accelAccel.x,2) + pow(accelAccel.z,2))) * (180/M_PI);
+	accelAngle.y = -atan2(accelAccel.x, sqrt(pow(accelAccel.y,2) + pow(accelAccel.z,2))) * (180/M_PI);
 
 	//combining the two
-	angle.x = .85 * (angle.x + gyroAngle.x * (dt/1000)) + (.15 * accelAngle.x);
-	angle.y = .85 * (angle.y + gyroAngle.y * (dt/1000)) + (.15 * accelAngle.y);
-	printf2("angle: %i \t %i \t|%i \t %i \t|%i \t%i |%i \t%i \t%i \n", (int)angle.x,(int)angle.y,(int)gyroAngle.x,(int)gyroAngle.y,(int) accelAngle.x, (int) accelAngle.y, (int)gyroRateSmooth.x,(int)gyroRateSmooth.y,(int)gyroRateSmooth.z);
+	angle.x = .8 * (angle.x + gyroRate.x * .004) + (.2 * accelAngle.x);
+	angle.y = .8 * (angle.y + gyroRate.y * .004) + (.2 * accelAngle.y);
+
+	//printf2("angle: %i \t %i \t|%i \t %i \n", (int)angle.x,(int)angle.y,(int)gyroAngle.x,(int)gyroAngle.y);
+
 
 	if (inputConnected)
 	{
@@ -49,12 +46,12 @@ void TASK_controller()
 
 			//scale input accordingly
 
+			Mode = (input[RC_AUX1] > 1450)?MODE_STAB: MODE_GYRO;
+
 			pos3D quadSet;
 			vector quadPos;
 
-			int throttle;
-
-			throttle = (input[RC_THROTTLE] > 1800) ? 1800 : input[RC_THROTTLE];
+			scaledInput[RC_THROTTLE] = (input[RC_THROTTLE] > 1800) ? 1800 : input[RC_THROTTLE];
 			quadSet.z = map(input[RC_YAW], STICK_MIN, STICK_MAX, -RATE_YAW_SCALE, RATE_YAW_SCALE, STICK_DEAD_MIN, STICK_DEAD_MAX);
 			if (Mode == MODE_GYRO)
 			{
@@ -68,7 +65,7 @@ void TASK_controller()
 				quadSet.x = map(input[RC_ROLL], STICK_MIN, STICK_MAX, -STAB_ROLL_SCALE, STAB_ROLL_SCALE, STICK_DEAD_MIN, STICK_DEAD_MAX);
 				quadSet.y = map(input[RC_PITCH], STICK_MIN, STICK_MAX, -STAB_PITCH_SCALE, STAB_PITCH_SCALE, STICK_DEAD_MIN, STICK_DEAD_MAX);
 
-				quadPos = angle;
+				quadPos = accelAngle;
 
 				if (Mode == MODE_BARO)
 				{
@@ -80,7 +77,7 @@ void TASK_controller()
 
 			quadPos.z = gyroRateSmooth.z;
 
-			processQuad(throttle, quadPos, quadSet);
+			processQuad(scaledInput[RC_THROTTLE], quadPos, quadSet);
 		}
 		else if (Armed())
 		{

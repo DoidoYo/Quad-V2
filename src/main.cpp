@@ -12,7 +12,7 @@ uint64_t loop_timer;
 int main(void) {
 
 	initTimer();
-	initUSART1(19200);
+	initUSART1(115200);
 
 	inputInit();
 	motorsInit();
@@ -35,7 +35,7 @@ int main(void) {
 		LED_R.low();
 	}
 
-	i2c.init(I2C1, 100000);
+	i2c.init(I2C1, 300000);
 
 	gyro.init(&i2c);
 	accel.init(&i2c);
